@@ -228,6 +228,37 @@
   .score-chip-val.minus { color: #e05c5c; }
   .score-chip-val.zero  { color: #6a6a8a; }
 
+  /* ★ 누적 합계 */
+  .total-scores {
+    margin-top: 14px;
+    background: #0a0a1a;
+    border: 1px solid #2a2a4a;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .total-title {
+    font-size: 11px; letter-spacing: 2px;
+    color: #6a6a8a; margin-bottom: 10px;
+    text-align: center;
+  }
+  .total-row {
+    display: flex; align-items: center;
+    gap: 8px; margin-bottom: 8px;
+  }
+  .total-bar-wrap {
+    flex: 1; height: 6px;
+    background: #1a1a2e; border-radius: 3px; overflow: hidden;
+  }
+  .total-bar { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+  .total-bar.freedom { background: #5ce0a0; }
+  .total-bar.safety  { background: #5cb8e0; }
+  .total-bar.equal   { background: #e8b86d; }
+  .total-name { font-size: 12px; font-weight: 700; width: 50px; }
+  .total-name.freedom { color: #5ce0a0; }
+  .total-name.safety  { color: #5cb8e0; }
+  .total-name.equal   { color: #e8b86d; }
+  .total-val { font-size: 13px; font-weight: 900; width: 32px; text-align: right; }
+
   /* 완료 화면 */
   .done-screen {
     text-align: center;
@@ -329,6 +360,24 @@
   <div class="score-reveal" id="scoreReveal">
     <div class="reveal-title">✨ 이번 장면 내 선택 결과</div>
     <div class="score-chips" id="scoreChips"></div>
+    <div class="total-scores" id="totalScores">
+      <div class="total-title">📊 지금까지 내 누적 점수</div>
+      <div class="total-row">
+        <span class="total-name freedom">🗽 자유</span>
+        <div class="total-bar-wrap"><div class="total-bar freedom" id="tBarFreedom" style="width:50%"></div></div>
+        <span class="total-val" id="tValFreedom">0</span>
+      </div>
+      <div class="total-row">
+        <span class="total-name safety">🛡 안전</span>
+        <div class="total-bar-wrap"><div class="total-bar safety" id="tBarSafety" style="width:50%"></div></div>
+        <span class="total-val" id="tValSafety">0</span>
+      </div>
+      <div class="total-row">
+        <span class="total-name equal">⚖️ 평등</span>
+        <div class="total-bar-wrap"><div class="total-bar equal" id="tBarEqual" style="width:50%"></div></div>
+        <span class="total-val" id="tValEqual">0</span>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -570,6 +619,20 @@ function showMyScores() {
   }).join('');
   
   reveal.classList.add('visible');
+
+  // ★ 누적 합계 업데이트
+  const f = myScores.freedom;
+  const sa = myScores.safety;
+  const e = myScores.equal;
+  const max = Math.max(Math.abs(f), Math.abs(sa), Math.abs(e), 1);
+
+  document.getElementById('tValFreedom').textContent = (f > 0 ? '+' : '') + f;
+  document.getElementById('tValSafety').textContent  = (sa > 0 ? '+' : '') + sa;
+  document.getElementById('tValEqual').textContent   = (e > 0 ? '+' : '') + e;
+
+  document.getElementById('tBarFreedom').style.width = Math.max(5, 50 + f  / max * 45) + '%';
+  document.getElementById('tBarSafety').style.width  = Math.max(5, 50 + sa / max * 45) + '%';
+  document.getElementById('tBarEqual').style.width   = Math.max(5, 50 + e  / max * 45) + '%';
 }
 
 function showDone() {
