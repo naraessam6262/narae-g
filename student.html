@@ -180,31 +180,42 @@
   .confirm-btn:hover { background: #9580ff; transform: translateY(-1px); }
   .confirm-btn:active { transform: translateY(0); }
 
-  /* 대기 화면 */
+  /* 대기 화면 — 좌우 2단 */
   .waiting {
-    text-align: center;
-    padding: 40px 20px;
     display: none;
+    width: 100%;
+    max-width: 480px;
   }
   .waiting.visible { display: block; }
-  .waiting-icon { font-size: 48px; margin-bottom: 16px; animation: pulse 2s infinite; }
+  .waiting-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .waiting-left {
+    text-align: center;
+    padding: 30px 16px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+  .waiting-icon { font-size: 44px; margin-bottom: 12px; animation: pulse 2s infinite; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .waiting h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  .waiting p { color: var(--muted); font-size: 14px; }
+  .waiting h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .waiting p { color: var(--muted); font-size: 13px; line-height: 1.6; }
 
-  /* ★ 점수 공개 카드 */
+  /* ★ 점수 공개 카드 — 오른쪽 */
   .score-reveal {
     display: none;
-    margin-top: 24px;
     background: #12122a;
     border: 1.5px solid #2a2a4a;
     border-radius: 16px;
-    padding: 20px;
-    text-align: center;
+    padding: 18px 16px;
     animation: fadeIn 0.5s ease;
   }
   .score-reveal.visible { display: block; }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes fadeIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
   .score-reveal .reveal-title {
     font-size: 13px; color: #8a8aaa;
     letter-spacing: 1px; margin-bottom: 14px;
@@ -354,28 +365,34 @@
 
 <!-- 대기 화면 -->
 <div class="waiting" id="waitingScreen">
-  <div class="waiting-icon">⏳</div>
-  <h2>선생님을 기다리는 중...</h2>
-  <p>선생님이 결과를 공개하면 내 점수가 보여요</p>
-  <div class="score-reveal" id="scoreReveal">
-    <div class="reveal-title">✨ 이번 장면 내 선택 결과</div>
-    <div class="score-chips" id="scoreChips"></div>
-    <div class="total-scores" id="totalScores">
-      <div class="total-title">📊 지금까지 내 누적 점수</div>
-      <div class="total-row">
-        <span class="total-name freedom">🗽 자유</span>
-        <div class="total-bar-wrap"><div class="total-bar freedom" id="tBarFreedom" style="width:50%"></div></div>
-        <span class="total-val" id="tValFreedom">0</span>
-      </div>
-      <div class="total-row">
-        <span class="total-name safety">🛡 안전</span>
-        <div class="total-bar-wrap"><div class="total-bar safety" id="tBarSafety" style="width:50%"></div></div>
-        <span class="total-val" id="tValSafety">0</span>
-      </div>
-      <div class="total-row">
-        <span class="total-name equal">⚖️ 평등</span>
-        <div class="total-bar-wrap"><div class="total-bar equal" id="tBarEqual" style="width:50%"></div></div>
-        <span class="total-val" id="tValEqual">0</span>
+  <div class="waiting-inner">
+    <!-- 왼쪽: 대기 메시지 -->
+    <div class="waiting-left">
+      <div class="waiting-icon">⏳</div>
+      <h2>선생님을<br>기다리는 중</h2>
+      <p>선생님이 결과를<br>공개하면 내 점수가<br>오른쪽에 나타나요</p>
+    </div>
+    <!-- 오른쪽: 점수 공개 -->
+    <div class="score-reveal" id="scoreReveal">
+      <div class="reveal-title">✨ 이번 장면</div>
+      <div class="score-chips" id="scoreChips"></div>
+      <div class="total-scores" id="totalScores">
+        <div class="total-title">📊 누적 점수</div>
+        <div class="total-row">
+          <span class="total-name freedom">🗽 자유</span>
+          <div class="total-bar-wrap"><div class="total-bar freedom" id="tBarFreedom" style="width:50%"></div></div>
+          <span class="total-val" id="tValFreedom">0</span>
+        </div>
+        <div class="total-row">
+          <span class="total-name safety">🛡 안전</span>
+          <div class="total-bar-wrap"><div class="total-bar safety" id="tBarSafety" style="width:50%"></div></div>
+          <span class="total-val" id="tValSafety">0</span>
+        </div>
+        <div class="total-row">
+          <span class="total-name equal">⚖️ 평등</span>
+          <div class="total-bar-wrap"><div class="total-bar equal" id="tBarEqual" style="width:50%"></div></div>
+          <span class="total-val" id="tValEqual">0</span>
+        </div>
       </div>
     </div>
   </div>
