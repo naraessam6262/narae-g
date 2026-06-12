@@ -10,7 +10,7 @@
   :root {
     --bg: #080812; --card: #10101e; --border: #22223a;
     --accent: #e8b86d; --accent2: #7c6af0;
-    --freedom: #5ce0a0; --safety: #5cb8e0; --equal: #e8b86d;
+    --freedom: #5ce0a0; --state: #5cb8e0; --equal: #e8b86d;
     --text: #f0ede8; --muted: #6a6a8a;
   }
   body {
@@ -114,12 +114,12 @@
   .score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
   .score-name { font-size: 12px; font-weight: 700; width: 56px; }
   .score-name.freedom { color: var(--freedom); }
-  .score-name.safety  { color: var(--safety); }
+  .score-name.state  { color: var(--state); }
   .score-name.equal   { color: var(--equal); }
   .score-bar-wrap { flex: 1; height: 10px; background: var(--border); border-radius: 5px; overflow: hidden; }
   .score-bar { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
   .score-bar.freedom { background: var(--freedom); }
-  .score-bar.safety  { background: var(--safety); }
+  .score-bar.state  { background: var(--state); }
   .score-bar.equal   { background: var(--equal); }
   .score-val { font-size: 13px; font-weight: 700; width: 32px; text-align: right; }
 
@@ -181,7 +181,7 @@
   .result-scores { display: flex; gap: 14px; margin-bottom: 20px; }
   .result-score-chip { padding: 8px 16px; border-radius: 30px; font-size: 14px; font-weight: 700; }
   .result-score-chip.freedom { background: rgba(92,224,160,0.2); color: var(--freedom); }
-  .result-score-chip.safety  { background: rgba(92,184,224,0.2); color: var(--safety); }
+  .result-score-chip.state  { background: rgba(92,184,224,0.2); color: var(--state); }
   .result-score-chip.equal   { background: rgba(232,184,109,0.2); color: var(--equal); }
   .result-desc { font-size: 16px; line-height: 1.9; color: #bbb; max-width: 560px; margin-bottom: 22px; }
   .result-question {
@@ -202,7 +202,7 @@
 <!-- ★ 인트로 오버레이 -->
 <div class="intro-overlay" id="introOverlay">
   <div class="intro-logo">🏛️</div>
-  <div class="intro-sub">2026 · 나래반 주제 수업</div>
+  <div class="intro-sub">2026 · 나래반 사회 수업</div>
   <div class="intro-title">나래국<br><span>인생게임</span></div>
   <div class="intro-desc">나는 나래국의 국민입니다<br>나의 선택이 나래국의 미래를 바꿉니다</div>
   <button class="intro-btn" onclick="startIntro()">▶ 게임 시작</button>
@@ -264,9 +264,9 @@
           <div class="score-val" id="valFreedom">0</div>
         </div>
         <div class="score-row">
-          <div class="score-name safety">🛡 안전</div>
-          <div class="score-bar-wrap"><div class="score-bar safety" id="barSafety" style="width:50%"></div></div>
-          <div class="score-val" id="valSafety">0</div>
+          <div class="score-name state">🏛️ 국가질서</div>
+          <div class="score-bar-wrap"><div class="score-bar state" id="barState" style="width:50%"></div></div>
+          <div class="score-val" id="valState">0</div>
         </div>
         <div class="score-row">
           <div class="score-name equal">⚖️ 평등</div>
@@ -445,47 +445,52 @@ const SCENES = [
     number: "장면 1", title: "강한의 약속",
     story: "나래국에 새 지도자 '강한'이 당선됐습니다. 국민 70%의 지지를 받은 인기 있는 지도자예요.",
     speech: "\"국민 여러분, 지금 나래국은 법을 만드는 곳, 나라 살림, 재판하는 곳이 따로따로라 서로 싸우느라 아무것도 못 하고 있습니다. 나쁜 사람이 잡혀도 기관끼리 책임을 미루다 풀려나요. 제가 직접 다 맡아서 빠르고 확실하게 해결하겠습니다. 저를 믿어주세요.\"",
+    question: "💬 나는 어떻게 반응할까?",
     choices: [
-      { label: "A", text: "맞아, 빠르고 확실한 게 낫지. 믿어보자.", scores: { freedom: -1, safety: 1, equal: 0 } },
-      { label: "B", text: "한 사람이 다 하면 나중에 문제가 생길 것 같아. 반대한다.", scores: { freedom: 1, safety: -1, equal: 0 } }
+      { label: "A", text: "맞아, 빠르고 확실한 게 낫지. 믿어보자.", scores: { freedom: -1, state: 1, equal: 0 } },
+      { label: "B", text: "한 사람이 다 하면 나중에 문제가 생길 것 같아. 반대한다.", scores: { freedom: 1, state: 0, equal: -1 } }
     ]
   },
   {
-    number: "장면 2", title: "안전을 위한 법",
-    story: "나래국에 범죄가 늘어나자 강한이 새 법을 만들었습니다. 내 친구가 이유도 모른 채 잡혀갔습니다.",
+    number: "장면 2", title: "질서를 위한 법",
+    story: "나래국에 범죄가 늘어나자 강한이 새 법을 만들었습니다. 그런데 내 친구가 이 법으로 이유도 모른 채 잡혀갔습니다.",
     speech: "\"국민 여러분의 안전을 위해, 수상한 사람은 재판 없이 먼저 잡아둘 수 있는 법을 만들었습니다. 억울한 사람은 나중에 풀어드리면 됩니다. 나쁜 사람을 빨리 잡는 게 먼저 아닐까요?\"",
+    question: "💬 나는 어떻게 할까?",
     choices: [
-      { label: "A", text: "나쁜 사람을 잡으려면 어쩔 수 없지. 참는다.", scores: { freedom: -1, safety: 1, equal: -1 } },
-      { label: "B", text: "재판도 없이 잡아두는 건 말이 안 돼. 항의한다.", scores: { freedom: 1, safety: -1, equal: 1 } }
+      { label: "A", text: "나쁜 사람을 잡으려면 어쩔 수 없지. 나라 질서가 먼저야.", scores: { freedom: -1, state: 1, equal: -1 } },
+      { label: "B", text: "재판도 없이 잡아두는 건 말이 안 돼. 항의한다.", scores: { freedom: 1, state: -1, equal: 1 } }
     ]
   },
   {
     number: "장면 3", title: "재판을 받으러 갔다",
     story: "항의했더니 오히려 나에게 벌금 고지서가 날아왔습니다. 재판을 신청했습니다.",
     speech: "\"저도 강한 지도자가 임명했습니다. 강한 지도자는 국민 70%가 뽑은 분입니다. 그분의 판단이 곧 국민의 뜻 아닐까요? 벌금을 내세요.\"",
+    question: "💬 이 재판을 받아들일까?",
     choices: [
-      { label: "A", text: "판사가 지도자 편이면 공정한 재판이 아니야. 계속 싸운다.", scores: { freedom: 1, safety: -1, equal: 1 } },
-      { label: "B", text: "70%가 뽑은 지도자니까... 어쩔 수 없다. 벌금을 낸다.", scores: { freedom: -1, safety: 1, equal: -1 } }
+      { label: "A", text: "판사가 지도자 편이면 공정한 재판이 아니야. 계속 싸운다.", scores: { freedom: 1, state: -1, equal: 1 } },
+      { label: "B", text: "70%가 뽑은 지도자의 뜻이니 나라 질서를 따르겠다. 벌금을 낸다.", scores: { freedom: -1, state: 1, equal: -1 } }
     ]
   },
   {
     number: "장면 4", title: "강한의 호소",
     story: "나래국 경제가 어려워졌습니다. 강한이 방송에 나와 말합니다.",
     speech: "\"국민 여러분, 지금 나래국이 어려운 건 저를 반대하는 세력들이 발목을 잡기 때문입니다. 저를 믿고 조금만 더 참아주세요. 비판하는 목소리가 클수록 나래국은 더 힘들어집니다.\"",
+    question: "💬 나는 어떻게 생각할까?",
     choices: [
-      { label: "A", text: "맞아, 지금은 단결해야 할 때야. 비판을 멈춘다.", scores: { freedom: -1, safety: 1, equal: -1 } },
-      { label: "B", text: "어려울수록 비판의 목소리가 필요해. 계속 말한다.", scores: { freedom: 1, safety: -1, equal: 0 } },
-      { label: "C", text: "모르겠다. 일단 지켜본다.", scores: { freedom: 0, safety: 0, equal: 0 } }
+      { label: "A", text: "맞아, 지금은 나라가 하나로 뭉쳐야 할 때야. 비판을 멈춘다.", scores: { freedom: -1, state: 1, equal: -1 } },
+      { label: "B", text: "어려울수록 비판의 목소리가 필요해. 계속 말한다.", scores: { freedom: 1, state: -1, equal: 0 } },
+      { label: "C", text: "모르겠다. 일단 지켜본다.", scores: { freedom: 0, state: 0, equal: 0 } }
     ]
   },
   {
     number: "장면 5", title: "광장에 모인 국민들",
-    story: "말 한마디 잘못했다가 잡혀간 이웃, 이유도 모른 채 내야 하는 세금... 드디어 많은 국민들이 광장에 모였습니다.",
+    story: "말 한마디 잘못했다가 잡혀간 이웃, 이유도 모른 채 내야 하는 세금, 항의해도 바뀌는 게 없는 나날들... 드디어 많은 국민들이 광장에 모였습니다.",
     speech: "\"여러분의 마음 압니다. 저도 답답합니다. 하지만 지금 이 문제들, 제가 다 해결할 수 있습니다. 조금만 더 믿어주세요. 대신 저에게 더 많은 권한을 주세요. 그러면 나래국을 반드시 바로잡겠습니다.\"",
+    question: "💬 나는 어떻게 할까?",
     choices: [
-      { label: "A", text: "더 많은 권한을 주면 오히려 더 위험해질 것 같아. 광장에 남는다.", scores: { freedom: 1, safety: -1, equal: 1 } },
-      { label: "B", text: "지금 이 상황을 빨리 해결하려면 어쩔 수 없다. 권한을 준다.", scores: { freedom: -1, safety: 1, equal: -1 } },
-      { label: "C", text: "광장엔 못 가지만 주변 사람들에게 조용히 알린다.", scores: { freedom: 1, safety: 0, equal: 0 } }
+      { label: "A", text: "더 많은 권한을 주면 오히려 더 위험해져. 광장에 남는다.", scores: { freedom: 1, state: -1, equal: 1 } },
+      { label: "B", text: "지금 나라가 혼란스러우니 강한에게 권한을 주는 게 맞다.", scores: { freedom: -1, state: 1, equal: -1 } },
+      { label: "C", text: "광장엔 못 가지만 주변 사람들에게 조용히 알린다.", scores: { freedom: 1, state: 0, equal: 0 } }
     ]
   }
 ];
@@ -554,7 +559,7 @@ function renderScene(idx) {
 function listenResponses() {
   onValue(ref(db, 'game/responses'), (snap) => {
     const data = snap.val() || {};
-    totalScores = { freedom: 0, safety: 0, equal: 0 };
+    totalScores = { freedom: 0, state: 0, equal: 0 };
 
     const sceneKey  = `scene${currentScene}`;
     const sceneData = data[sceneKey] || {};
@@ -569,7 +574,7 @@ function listenResponses() {
     Object.keys(data).forEach(sk => {
       Object.values(data[sk]).forEach(r => {
         totalScores.freedom += r.freedom || 0;
-        totalScores.safety  += r.safety  || 0;
+        totalScores.state  += r.state  || 0;
         totalScores.equal   += r.equal   || 0;
       });
     });
@@ -590,16 +595,16 @@ function listenResponses() {
 
 function updateScoreBars() {
   const f = totalScores.freedom;
-  const s = totalScores.safety;
+  const s = totalScores.state;
   const e = totalScores.equal;
   const max = Math.max(Math.abs(f), Math.abs(s), Math.abs(e), 1);
 
   document.getElementById('valFreedom').textContent = (f > 0 ? '+' : '') + f;
-  document.getElementById('valSafety').textContent  = (s > 0 ? '+' : '') + s;
+  document.getElementById('valState').textContent  = (s > 0 ? '+' : '') + s;
   document.getElementById('valEqual').textContent   = (e > 0 ? '+' : '') + e;
 
   document.getElementById('barFreedom').style.width = (50 + f / max * 45) + '%';
-  document.getElementById('barSafety').style.width  = (50 + s / max * 45) + '%';
+  document.getElementById('barState').style.width  = (50 + s / max * 45) + '%';
   document.getElementById('barEqual').style.width   = (50 + e / max * 45) + '%';
 }
 
@@ -636,7 +641,7 @@ window.showResult = function() {
 
   document.getElementById('resultScores').innerHTML = `
     <span class="result-score-chip freedom">🗽 자유 ${totalScores.freedom > 0 ? '+' : ''}${totalScores.freedom}</span>
-    <span class="result-score-chip safety">🛡 안전 ${totalScores.safety > 0 ? '+' : ''}${totalScores.safety}</span>
+    <span class="result-score-chip state">🏛️ 국가질서 ${totalScores.state > 0 ? '+' : ''}${totalScores.state}</span>
     <span class="result-score-chip equal">⚖️ 평등 ${totalScores.equal > 0 ? '+' : ''}${totalScores.equal}</span>
   `;
 
