@@ -500,23 +500,36 @@ window.startGame = function() {
   document.getElementById('progressBar').style.display = 'flex';
   document.getElementById('gameWrapper').style.display = 'flex';
 
+  let initialized = false;
+
   // Firebase 장면 번호 감지
   onValue(ref(db, 'game/currentScene'), (snap) => {
     const serverScene = snap.val() ?? 0;
     gamePhase = serverScene;
+
     if (serverScene >= SCENES.length) {
       showDone();
-    } else if (serverScene === currentScene) {
+      return;
+    }
+
+    if (!initialized) {
+      // 최초 진입 시 한 번만 렌더링
+      initialized = true;
+      currentScene = serverScene;
       renderScene(currentScene);
-    } else if (serverScene > currentScene) {
-      // 선생님이 다음 장면으로 넘겼을 때
+      return;
+    }
+
+    if (serverScene > currentScene) {
+      // 선생님이 다음 장면으로 넘겼을 때만 렌더링
       currentScene = serverScene;
       selectedChoice = null;
-      // 점수 공개 초기화
+      window._lastScores = null;
       document.getElementById('scoreReveal').classList.remove('visible');
       hideWaiting();
       renderScene(currentScene);
     }
+    // serverScene === currentScene 이면 아무것도 안 함 (재렌더링 방지)
   });
 
   // ★ 선생님 결과 공개 감지
