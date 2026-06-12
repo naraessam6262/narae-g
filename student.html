@@ -566,7 +566,9 @@ function renderScene(idx) {
     list.appendChild(btn);
   });
 
-  document.getElementById('confirmBtn').classList.remove('visible');
+  const cb = document.getElementById('confirmBtn');
+  cb.classList.remove('visible');
+  cb.style.display = '';  // style.display 강제 리셋
   selectedChoice = null;
 }
 
@@ -603,7 +605,7 @@ window.submitChoice = async function() {
 
   // 버튼 비활성화
   document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
-  document.getElementById('confirmBtn').style.display = 'none';
+  document.getElementById('confirmBtn').classList.remove('visible');
   showWaiting();
 };
 
