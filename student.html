@@ -33,6 +33,23 @@
     padding: 20px 16px 40px;
   }
 
+  /* 게임 진행 중 좌우 2단 래퍼 */
+  .game-wrapper {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    max-width: 760px;
+    align-items: flex-start;
+  }
+  .game-left {
+    flex: 1;
+    min-width: 0;
+  }
+  .game-right {
+    width: 220px;
+    flex-shrink: 0;
+  }
+
   /* 헤더 */
   .header {
     text-align: center;
@@ -73,7 +90,6 @@
   /* 장면 카드 */
   .scene-card {
     width: 100%;
-    max-width: 480px;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: 16px;
@@ -163,7 +179,6 @@
   /* 확인 버튼 */
   .confirm-btn {
     width: 100%;
-    max-width: 480px;
     padding: 16px;
     background: var(--accent2);
     color: #fff;
@@ -180,32 +195,14 @@
   .confirm-btn:hover { background: #9580ff; transform: translateY(-1px); }
   .confirm-btn:active { transform: translateY(0); }
 
-  /* 대기 화면 — 좌우 2단 */
-  .waiting {
-    display: none;
-    width: 100%;
-    max-width: 480px;
-  }
+  /* 대기 상태 표시 (장면카드 위에 오버레이처럼) */
+  .waiting { display: none; }
   .waiting.visible { display: block; }
-  .waiting-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    align-items: start;
-  }
-  .waiting-left {
-    text-align: center;
-    padding: 30px 16px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-  }
-  .waiting-icon { font-size: 44px; margin-bottom: 12px; animation: pulse 2s infinite; }
+  .waiting-icon { display: none; }
+  .waiting-left { display: none; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .waiting h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
-  .waiting p { color: var(--muted); font-size: 13px; line-height: 1.6; }
 
-  /* ★ 점수 공개 카드 — 오른쪽 */
+  /* ★ 점수 공개 카드 — 오른쪽 패널 */
   .score-reveal {
     display: none;
     background: #12122a;
@@ -213,6 +210,7 @@
     border-radius: 16px;
     padding: 18px 16px;
     animation: fadeIn 0.5s ease;
+    width: 220px;
   }
   .score-reveal.visible { display: block; }
   @keyframes fadeIn { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
@@ -359,20 +357,19 @@
   <div class="progress-dot" id="dot4"></div>
 </div>
 
-<!-- 장면 카드 -->
-<div class="scene-card" id="sceneCard" style="display:none"></div>
-<button class="confirm-btn" id="confirmBtn" onclick="submitChoice()">선택 완료 →</button>
-
-<!-- 대기 화면 -->
-<div class="waiting" id="waitingScreen">
-  <div class="waiting-inner">
-    <!-- 왼쪽: 대기 메시지 -->
-    <div class="waiting-left">
-      <div class="waiting-icon">⏳</div>
-      <h2>선생님을<br>기다리는 중</h2>
-      <p>선생님이 결과를<br>공개하면 내 점수가<br>오른쪽에 나타나요</p>
+<!-- 게임 2단 래퍼 -->
+<div class="game-wrapper" id="gameWrapper" style="display:none">
+  <!-- 왼쪽: 장면 카드 + 선택 버튼 -->
+  <div class="game-left">
+    <div class="scene-card" id="sceneCard"></div>
+    <button class="confirm-btn" id="confirmBtn" onclick="submitChoice()">선택 완료 →</button>
+    <!-- 대기 상태 표시 -->
+    <div class="waiting" id="waitingScreen">
+      <div class="waiting-left"></div>
     </div>
-    <!-- 오른쪽: 점수 공개 -->
+  </div>
+  <!-- 오른쪽: 점수 패널 (선생님 공개 후 표시) -->
+  <div class="game-right">
     <div class="score-reveal" id="scoreReveal">
       <div class="reveal-title">✨ 이번 장면</div>
       <div class="score-chips" id="scoreChips"></div>
@@ -501,7 +498,7 @@ window.startGame = function() {
   studentName = nameInput.value.trim();
   document.getElementById('nameScreen').style.display = 'none';
   document.getElementById('progressBar').style.display = 'flex';
-  document.getElementById('sceneCard').style.display = 'block';
+  document.getElementById('gameWrapper').style.display = 'flex';
 
   // Firebase 장면 번호 감지
   onValue(ref(db, 'game/currentScene'), (snap) => {
@@ -598,10 +595,12 @@ window.submitChoice = async function() {
 };
 
 function showWaiting() {
+  // 장면카드는 그대로, 선택지만 비활성화 상태 유지
   document.getElementById('waitingScreen').classList.add('visible');
 }
 function hideWaiting() {
   document.getElementById('waitingScreen').classList.remove('visible');
+  document.getElementById('scoreReveal').classList.remove('visible');
 }
 
 function updateProgress(idx) {
@@ -658,6 +657,8 @@ function showDone() {
   document.getElementById('waitingScreen').classList.remove('visible');
   document.getElementById('progressBar').style.display = 'none';
 
+  document.getElementById('gameWrapper').style.display = 'none';
+  document.getElementById('progressBar').style.display = 'none';
   const done = document.getElementById('doneScreen');
   done.classList.add('visible');
 
