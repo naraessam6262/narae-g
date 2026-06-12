@@ -405,7 +405,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, set, get, onValue, push } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAkYXmU42dfl4-JAtol7bGBsbs8k9QBWhQ",
@@ -494,11 +494,22 @@ nameInput.addEventListener('input', () => {
   document.getElementById('startBtn').disabled = nameInput.value.trim().length === 0;
 });
 
-window.startGame = function() {
+window.startGame = async function() {
   studentName = nameInput.value.trim();
   document.getElementById('nameScreen').style.display = 'none';
   document.getElementById('progressBar').style.display = 'flex';
   document.getElementById('gameWrapper').style.display = 'flex';
+
+  // ★ Firebase에서 내 누적 점수 복구 (새로고침 대비)
+  try {
+    const snap = await get(ref(db, `game/myScores/${studentName}`));
+    const savedScores = snap.val();
+    if (savedScores) {
+      myScores.freedom = savedScores.freedom || 0;
+      myScores.safety  = savedScores.safety  || 0;
+      myScores.equal   = savedScores.equal   || 0;
+    }
+  } catch(e) {}
 
   let initialized = false;
 
@@ -601,6 +612,13 @@ window.submitChoice = async function() {
     safety: scores.safety,
     equal: scores.equal,
     timestamp: Date.now()
+  });
+
+  // ★ 개인 누적 점수도 Firebase에 저장 (새로고침 대비)
+  await set(ref(db, `game/myScores/${studentName}`), {
+    freedom: myScores.freedom,
+    safety:  myScores.safety,
+    equal:   myScores.equal
   });
 
   // 버튼 비활성화
