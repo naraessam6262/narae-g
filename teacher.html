@@ -139,6 +139,35 @@
   .ctrl-btn.reset  { background: var(--border); color: var(--muted); }
   .ctrl-btn.reset:hover { background: #2a2a4a; color: #fff; }
 
+  /* ── 인트로 화면 ── */
+  .intro-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: #080812;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    transition: opacity 0.8s ease;
+  }
+  .intro-overlay.fadeout { opacity: 0; pointer-events: none; }
+  .intro-overlay.hidden  { display: none; }
+  .intro-logo { font-size: 72px; margin-bottom: 16px; animation: float 3s ease-in-out infinite; }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .intro-sub  { font-size: 14px; letter-spacing: 4px; color: #7c6af0; margin-bottom: 12px; }
+  .intro-title { font-size: 48px; font-weight: 900; color: #f0ede8; line-height: 1.2; margin-bottom: 8px; }
+  .intro-title span { color: #e8b86d; }
+  .intro-desc { font-size: 15px; color: #6a6a8a; margin-bottom: 48px; line-height: 1.8; }
+  .intro-btn {
+    padding: 18px 52px; background: #e8b86d; color: #000;
+    border: none; border-radius: 50px; font-size: 18px;
+    font-family: 'Noto Sans KR', sans-serif; font-weight: 900;
+    cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 0 30px rgba(232,184,109,0.4);
+    animation: glow 2s ease-in-out infinite;
+  }
+  @keyframes glow { 0%,100%{box-shadow:0 0 20px rgba(232,184,109,0.3)} 50%{box-shadow:0 0 50px rgba(232,184,109,0.7)} }
+  .intro-btn:hover { transform: scale(1.05); }
+  .intro-music-label { margin-top: 20px; font-size: 12px; color: #3a3a5a; }
+
   /* ── 결말 오버레이 ── */
   .result-overlay {
     display: none; position: fixed; inset: 0;
@@ -169,6 +198,16 @@
 </style>
 </head>
 <body>
+
+<!-- ★ 인트로 오버레이 -->
+<div class="intro-overlay" id="introOverlay">
+  <div class="intro-logo">🏛️</div>
+  <div class="intro-sub">2026 · 나래반 사회 수업</div>
+  <div class="intro-title">나래국<br><span>인생게임</span></div>
+  <div class="intro-desc">나는 나래국의 국민입니다<br>나의 선택이 나래국의 미래를 바꿉니다</div>
+  <button class="intro-btn" onclick="startIntro()">▶ 게임 시작</button>
+  <div class="intro-music-label" id="musicLabel">🎵 음악 준비 중...</div>
+</div>
 
 <!-- 헤더 -->
 <div class="top-bar">
@@ -273,6 +312,124 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
+
+// ── ★ 사운드 시스템 (Web Audio API) ──────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let bgmGain = null;
+let bgmPlaying = false;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new AudioCtx();
+  return audioCtx;
+}
+
+// 클릭 효과음 — 밝고 경쾌한 톤
+function playClick() {
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.1);
+    g.gain.setValueAtTime(0.3, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    o.start(); o.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
+}
+
+// 결과 공개 효과음 — 드럼롤 느낌
+function playReveal() {
+  try {
+    const ctx = getAudioCtx();
+    [0, 0.05, 0.1, 0.15, 0.2].forEach((t, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.type = 'square';
+      o.frequency.value = 200 + i * 80;
+      g.gain.setValueAtTime(0.15, ctx.currentTime + t);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + 0.08);
+      o.start(ctx.currentTime + t);
+      o.stop(ctx.currentTime + t + 0.1);
+    });
+    // 마지막 팡파레
+    setTimeout(() => {
+      [523, 659, 784].forEach((freq, i) => {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = freq;
+        g.gain.setValueAtTime(0.2, ctx.currentTime + i * 0.07);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.07 + 0.3);
+        o.start(ctx.currentTime + i * 0.07);
+        o.stop(ctx.currentTime + i * 0.07 + 0.3);
+      });
+    }, 350);
+  } catch(e) {}
+}
+
+// 다음 장면 효과음 — 슉 하는 전환음
+function playNext() {
+  try {
+    const ctx = getAudioCtx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(300, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.2);
+    g.gain.setValueAtTime(0.2, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+    o.start(); o.stop(ctx.currentTime + 0.2);
+  } catch(e) {}
+}
+
+// BGM — 긴장감 있는 반복 멜로디
+function startBGM() {
+  if (bgmPlaying) return;
+  try {
+    const ctx = getAudioCtx();
+    bgmGain = ctx.createGain();
+    bgmGain.gain.value = 0.08;
+    bgmGain.connect(ctx.destination);
+
+    const notes = [220, 246, 261, 220, 196, 220, 246, 261, 293, 261, 246, 220];
+    let step = 0;
+
+    function playNote() {
+      if (!bgmPlaying) return;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.connect(g); g.connect(bgmGain);
+      o.frequency.value = notes[step % notes.length];
+      g.gain.setValueAtTime(0.6, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      o.start(); o.stop(ctx.currentTime + 0.4);
+      step++;
+      setTimeout(playNote, 420);
+    }
+
+    bgmPlaying = true;
+    playNote();
+    document.getElementById('musicLabel').textContent = '🎵 배경음악 재생 중';
+  } catch(e) {}
+}
+
+function stopBGM() {
+  bgmPlaying = false;
+  if (bgmGain) { bgmGain.gain.value = 0; }
+}
+
+// ── ★ 인트로 시작 ────────────────────────────────────────
+window.startIntro = function() {
+  startBGM();
+  const overlay = document.getElementById('introOverlay');
+  overlay.classList.add('fadeout');
+  setTimeout(() => overlay.classList.add('hidden'), 800);
+  init();
+};
 
 // ── 장면별 Unsplash 이미지 (무료, 저작권 없음) ──────────────
 const SCENE_IMAGES = [
@@ -448,6 +605,7 @@ function updateScoreBars() {
 
 // ── ★ 결과 공개 버튼 ──────────────────────────────────────
 window.revealScores = async function() {
+  playReveal();
   scoresRevealed = true;
   document.getElementById('scoresHidden').style.display = 'none';
   document.getElementById('scoresBody').classList.add('revealed');
@@ -463,6 +621,7 @@ window.revealScores = async function() {
 
 // ── 다음 장면 ─────────────────────────────────────────────
 window.nextScene = async function() {
+  playNext();
   if (currentScene >= SCENES.length - 1) return;
   currentScene++;
   await set(ref(db, 'game/currentScene'), currentScene);
@@ -514,7 +673,7 @@ window.resetGame = async function() {
   document.getElementById('responseCount').textContent = '0';
 };
 
-init();
+// init()은 인트로 버튼에서 호출
 </script>
 </body>
 </html>
